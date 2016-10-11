@@ -1,6 +1,7 @@
 const chai = require('chai');
 const sinon = require('sinon');
 const sinonChai = require('sinon-chai');
+const sinonAsPromised = require('sinon-as-promised');
 const expect = chai.expect;
 
 chai.use(sinonChai);
@@ -13,7 +14,7 @@ describe('AccountService', () => {
 
   beforeEach(() => {
     db = {
-      querySync: sinon.stub()
+      query: sinon.stub()
     };
     accountService = new AccountService(db);
   });
@@ -21,19 +22,18 @@ describe('AccountService', () => {
   describe('.findById()', () => {
     describe('when called for an existing account', () => {
       it('should return the account', () => {
-        db.querySync.withArgs('account', { id: 1 }).returns([{
+        db.query.withArgs('account', { id: 1 }).resolves([{
           id: 1,
           name: 'John Doe'
         }]);
 
-        const callback = sinon.spy();
-
-        accountService.findById(1, callback);
-
-        expect(callback).to.have.been.calledWith({
-          id: 1,
-          name: 'John Doe'
-        });
+        return accountService.findById(1)
+          .then((account) => {
+            expect(account).to.deep.equal({
+              id: 1,
+              name: 'John Doe'
+            });
+          });
       });
     });
   });
