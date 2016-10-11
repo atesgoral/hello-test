@@ -2,9 +2,11 @@ const chai = require('chai');
 const sinon = require('sinon');
 const sinonChai = require('sinon-chai');
 const sinonAsPromised = require('sinon-as-promised');
+const chaiAsPromised = require('chai-as-promised');
 const expect = chai.expect;
 
 chai.use(sinonChai);
+chai.use(chaiAsPromised);
 
 const AccountService = require('../src/accountService');
 
@@ -27,12 +29,10 @@ describe('AccountService', () => {
           name: 'John Doe'
         }]);
 
-        return accountService.findById(1)
-          .then((account) => {
-            expect(account).to.deep.equal({
-              id: 1,
-              name: 'John Doe'
-            });
+        return expect(accountService.findById(1))
+          .to.eventually.deep.equal({
+            id: 1,
+            name: 'John Doe'
           });
       });
     });
@@ -43,15 +43,8 @@ describe('AccountService', () => {
           new Error('Account not found')
         );
 
-        return accountService.findById(-1)
-          .catch((error) => {
-            expect(error).to.deep.equal(
-              new Error('Account not found')
-            );
-          })
-          .then(() => {
-            throw new Error('Should not have been resolved');
-          });
+        return expect(accountService.findById(-1))
+          .to.eventually.be.rejectedWith(Error, 'Account not found');
       });
     });
   });
