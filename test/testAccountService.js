@@ -48,6 +48,9 @@ describe('AccountService', () => {
             expect(error).to.deep.equal(
               new Error('Account not found')
             );
+          })
+          .then(() => {
+            throw new Error('Should not have been resolved');
           });
       });
     });
